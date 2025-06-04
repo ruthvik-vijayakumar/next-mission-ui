@@ -1,15 +1,5 @@
 # Next Mission UI
 
-A modern web application built with Vue 3 for managing missions and tasks.
-
-## Features
-
-- Mission management system
-- Task tracking and organization
-- Modern UI with responsive design
-- Real-time updates
-- User authentication and authorization
-
 ## Tech Stack
 
 - Vue 3
