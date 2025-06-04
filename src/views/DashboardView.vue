@@ -403,8 +403,9 @@ const handleCtaClick = (id) => {
       router.push('/chatbot')
       // Send WebSocket message after navigation
       setTimeout(() => {
-        const message = "i want to start a new business based on my vetran expereicne"
-        websocketStore.sendMessage(message)
+        const message = "i want to start a new business based on my veteran expereicne"
+        router.push({name: 'Chatbot', query: { message } })
+        //websocketStore.sendMessage(message)
       }, 100)
       break
   }

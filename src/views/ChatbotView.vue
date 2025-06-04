@@ -164,17 +164,18 @@ import { marked } from 'marked'
 import { useChatStore } from '@/stores/chat'
 import { useAuthStore } from '@/stores/auth'
 import { api } from '@/utils/axios'
-
+import { useRouter } from 'vue-router'
 const chatStore = useChatStore()
 const authStore = useAuthStore()
 const chatContainer = ref(null)
 const userInput = ref('')
 const ws = ref(null)
 const isConnected = ref(false)
+const initialMessageSent = ref(false)
 
 // Get user ID from auth store
 const userId = computed(() => authStore.user?.user_id)
-
+const router = useRouter()
 // Use store values instead of local refs
 const messages = computed(() => chatStore.messages)
 const bookmarkedMessages = computed(() => chatStore.bookmarkedMessages)
@@ -247,6 +248,14 @@ const connectWebSocket = () => {
   ws.value.onopen = () => {
     isConnected.value = true
     console.log('WebSocket connected')
+    
+    // Check for query message after connection is established
+    const query = router.currentRoute.value.query
+    if (query.message && !initialMessageSent.value) {
+      userInput.value = query.message
+      sendMessage()
+      initialMessageSent.value = true
+    }
   }
 
   ws.value.onclose = () => {
