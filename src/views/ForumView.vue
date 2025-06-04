@@ -1,267 +1,157 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
+  <div class="min-h-screen bg-gray-50 py-4">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
-      <div class="mb-8">
+      <div class="mb-4">
         <div class="flex justify-between items-center">
           <div>
-            <h1 class="text-3xl font-bold text-military-blue">Veteran Forum</h1>
-            <p class="mt-2 text-gray-600">Connect, share, and learn from fellow veterans</p>
+            <h1 class="text-xl font-bold text-military-blue">Veteran Forum</h1>
+            <p class="mt-1 text-gray-600">Connect, share, and learn from fellow veterans</p>
           </div>
-          <button
-            @click="showNewPostModal = true"
-            class="btn-primary"
-          >
-            Create New Post
-          </button>
         </div>
       </div>
 
-      <!-- Filters -->
-      <div class="bg-white shadow rounded-lg p-6 mb-8">
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-4">
-          <div>
-            <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
-            <select
-              id="category"
-              v-model="selectedCategory"
-              class="input-field mt-1"
-            >
-              <option value="">All Categories</option>
-              <option v-for="category in categories" :key="category" :value="category">
-                {{ category }}
-              </option>
-            </select>
+      <!-- FAB -->
+      <button
+        @click="showNewPostModal = true"
+        class="fixed bottom-20 right-6 p-4 bg-military-blue text-white rounded-full shadow-lg hover:bg-opacity-90 transition-colors duration-200 z-10"
+      >
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        </svg>
+      </button>
+
+      <!-- Top Bar: Search, Filter -->
+      <div class="flex items-center justify-between mb-2 gap-2">
+        <!-- Search Bar Container -->
+        <div class="relative flex-1">
+          <input
+            v-model="searchQuery"
+            type="text"
+            class="w-full rounded-full pl-12 pr-4 py-2 border border-gray-200 shadow-sm focus:border-military-blue focus:ring-2 focus:ring-military-blue focus:ring-offset-2 transition-all duration-200 placeholder-gray-400 bg-white text-gray-700"
+            placeholder="Search posts..."
+          />
+          <div class="absolute left-4 top-1/2 -translate-y-1/2">
+            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+            </svg>
           </div>
-          <div>
-            <label for="sort" class="block text-sm font-medium text-gray-700">Sort By</label>
-            <select
-              id="sort"
-              v-model="sortBy"
-              class="input-field mt-1"
-            >
-              <option value="recent">Most Recent</option>
-              <option value="popular">Most Popular</option>
-              <option value="comments">Most Comments</option>
-            </select>
-          </div>
-          <div>
-            <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
-            <input
-              type="text"
-              id="search"
-              v-model="searchQuery"
-              class="input-field mt-1"
-              placeholder="Search posts..."
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Tags</label>
-            <div class="mt-1 flex flex-wrap gap-2">
-              <button
-                v-for="tag in selectedTags"
-                :key="tag"
-                @click="toggleTag(tag)"
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                :class="[
-                  activeTags.includes(tag)
-                    ? 'bg-military-blue text-white'
-                    : 'bg-gray-100 text-gray-800'
-                ]"
-              >
-                {{ tag }}
+        </div>
+
+        <!-- Filter Button -->
+        <button 
+          @click="showFilterModal = true" 
+          class="inline-flex items-center px-5 py-2 rounded-full bg-white text-military-blue  border border-gray-200 hover:bg-military-blue/90 focus:outline-none focus:ring-2 focus:ring-military-blue focus:ring-offset-2 transition-all duration-200 font-medium"
+        >
+          <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M6 6h12M9 14h6M12 18h0" />
+          </svg>
+          Filter
+        </button>
+      </div>
+
+      <!-- Filter/Sort Modal (Tailwind UI style) -->
+      <transition name="fade">
+        <div v-if="showFilterModal" class="fixed inset-0 z-50 flex items-center justify-center">
+          <!-- Overlay -->
+          <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity" @click="showFilterModal = false" aria-hidden="true"></div>
+          <!-- Modal panel -->
+          <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-md mx-auto px-6 py-6 sm:px-8 sm:py-8 flex flex-col focus:outline-none">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-military-blue">Filter & Sort</h3>
+              <button @click="showFilterModal = false" class="rounded-full p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-military-blue">
+                <span class="sr-only">Close modal</span>
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <!-- Modal content -->
+            <div class="space-y-5">
+              <div>
+                <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                <select
+                  id="category"
+                  v-model="selectedCategory"
+                  class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-military-blue focus:ring-military-blue"
+                >
+                  <option value="">All Categories</option>
+                  <option v-for="category in categories" :key="category" :value="category">
+                    {{ category }}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label for="sort" class="block text-sm font-medium text-gray-700">Sort By</label>
+                <select
+                  id="sort"
+                  v-model="sortBy"
+                  class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-military-blue focus:ring-military-blue"
+                >
+                  <option value="recent">Most Recent</option>
+                  <option value="popular">Most Popular</option>
+                  <option value="comments">Most Comments</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Tags</label>
+                <div class="mt-1 flex flex-wrap gap-2">
+                  <button
+                    v-for="tag in selectedTags"
+                    :key="tag"
+                    @click="toggleTag(tag)"
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium focus:outline-none focus:ring-2 focus:ring-military-blue transition"
+                    :class="[
+                      activeTags.includes(tag)
+                        ? 'bg-military-blue text-white'
+                        : 'bg-gray-100 text-gray-800'
+                    ]"
+                  >
+                    {{ tag }}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Modal actions -->
+            <div class="mt-8 flex justify-end">
+              <button @click="showFilterModal = false" class="inline-flex justify-center rounded-md border border-transparent bg-military-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-military-blue-dark focus:outline-none focus:ring-2 focus:ring-military-blue focus:ring-offset-2 transition">
+                Apply
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </transition>
 
       <!-- Posts List -->
       <div class="space-y-6">
-        <div
+        <PostCard
           v-for="post in filteredPosts"
           :key="post.id"
-          class="bg-white shadow rounded-lg overflow-hidden"
-        >
-          <div class="p-6">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <img
-                  class="h-10 w-10 rounded-full"
-                  :src="post.author.avatar"
-                  :alt="post.author.name"
-                />
-                <div class="ml-4">
-                  <h3 class="text-lg font-medium text-gray-900">{{ post.title }}</h3>
-                  <p class="text-sm text-gray-500">
-                    Posted by {{ post.author.name }} • {{ post.date }}
-                  </p>
-                </div>
-              </div>
-              <div class="flex items-center space-x-4">
-                <button
-                  @click="toggleAnonymous(post)"
-                  class="text-sm text-gray-500 hover:text-military-blue"
-                >
-                  {{ post.isAnonymous ? 'Anonymous' : 'Public' }}
-                </button>
-                <button
-                  @click="toggleBookmark(post)"
-                  class="text-sm text-gray-500 hover:text-military-blue"
-                >
-                  {{ post.isBookmarked ? 'Bookmarked' : 'Bookmark' }}
-                </button>
-              </div>
-            </div>
-            <div class="mt-4">
-              <p class="text-gray-600">{{ post.content }}</p>
-            </div>
-            <div class="mt-4 flex flex-wrap gap-2">
-              <span
-                v-for="tag in post.tags"
-                :key="tag"
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-              >
-                {{ tag }}
-              </span>
-            </div>
-            <div class="mt-6 flex items-center justify-between">
-              <div class="flex items-center space-x-4">
-                <button
-                  @click="toggleLike(post)"
-                  class="flex items-center text-sm text-gray-500 hover:text-military-blue"
-                >
-                  <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                  {{ post.likes }}
-                </button>
-                <button
-                  @click="showComments(post)"
-                  class="flex items-center text-sm text-gray-500 hover:text-military-blue"
-                >
-                  <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                  {{ post.comments.length }}
-                </button>
-              </div>
-              <button
-                @click="showComments(post)"
-                class="text-sm text-military-blue hover:text-olive-green"
-              >
-                View Discussion
-              </button>
-            </div>
-          </div>
-        </div>
+          :post="post"
+          @show-comments="showComments"
+        />
       </div>
 
-      <!-- New Post Modal -->
-      <div
-        v-if="showNewPostModal"
-        class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4"
-      >
-        <div class="bg-white rounded-lg max-w-2xl w-full p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Create New Post</h3>
-          <div class="space-y-4">
-            <div>
-              <label for="post-title" class="block text-sm font-medium text-gray-700">
-                Title
-              </label>
-              <input
-                type="text"
-                id="post-title"
-                v-model="newPost.title"
-                class="input-field mt-1"
-                placeholder="Enter post title"
-              />
-            </div>
-            <div>
-              <label for="post-category" class="block text-sm font-medium text-gray-700">
-                Category
-              </label>
-              <select
-                id="post-category"
-                v-model="newPost.category"
-                class="input-field mt-1"
-              >
-                <option v-for="category in categories" :key="category" :value="category">
-                  {{ category }}
-                </option>
-              </select>
-            </div>
-            <div>
-              <label for="post-content" class="block text-sm font-medium text-gray-700">
-                Content
-              </label>
-              <textarea
-                id="post-content"
-                v-model="newPost.content"
-                rows="6"
-                class="input-field mt-1"
-                placeholder="Write your post content here..."
-              ></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Tags</label>
-              <div class="mt-1 flex flex-wrap gap-2">
-                <button
-                  v-for="tag in selectedTags"
-                  :key="tag"
-                  @click="toggleNewPostTag(tag)"
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  :class="[
-                    newPost.tags.includes(tag)
-                      ? 'bg-military-blue text-white'
-                      : 'bg-gray-100 text-gray-800'
-                  ]"
-                >
-                  {{ tag }}
-                </button>
-              </div>
-            </div>
-            <div class="flex items-center">
-              <input
-                id="anonymous"
-                v-model="newPost.isAnonymous"
-                type="checkbox"
-                class="h-4 w-4 text-military-blue focus:ring-military-blue border-gray-300 rounded"
-              />
-              <label for="anonymous" class="ml-2 block text-sm text-gray-900">
-                Post anonymously
-              </label>
-            </div>
-          </div>
-          <div class="mt-6 flex justify-end space-x-3">
-            <button
-              @click="showNewPostModal = false"
-              class="btn-secondary"
-            >
-              Cancel
-            </button>
-            <button
-              @click="submitNewPost"
-              class="btn-primary"
-            >
-              Create Post
-            </button>
-          </div>
-        </div>
-      </div>
+      <!-- Create Post Modal -->
+      <CreatePostModal v-model="showNewPostModal"  />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { toast } from 'vue3-toastify'
+import { useForumStore } from '@/stores/forum'
+import PostCard from '@/components/PostCard.vue'
+import CreatePostModal from '@/components/CreatePostModal.vue'
 
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const sortBy = ref('recent')
 const activeTags = ref([])
 const showNewPostModal = ref(false)
+const showFilterModal = ref(false)
 
 const categories = [
   'Job Search',
@@ -283,42 +173,12 @@ const selectedTags = [
   'Housing'
 ]
 
-const newPost = ref({
-  title: '',
-  category: '',
-  content: '',
-  tags: [],
-  isAnonymous: false
-})
+const forumStore = useForumStore()
 
-const posts = [
-  {
-    id: 1,
-    title: 'Tips for translating military experience to civilian resume',
-    content: 'I\'ve been working on my resume and wanted to share some tips that helped me land interviews...',
-    author: {
-      name: 'John Smith',
-      avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
-    },
-    date: '2 hours ago',
-    category: 'Job Search',
-    tags: ['Resume Help', 'Career Transition'],
-    likes: 24,
-    comments: [
-      {
-        id: 1,
-        author: 'Sarah Johnson',
-        content: 'Great tips! I would also add...',
-        date: '1 hour ago'
-      }
-    ],
-    isAnonymous: false,
-    isBookmarked: false
-  }
-]
+const posts = computed(() => forumStore.posts)
 
 const filteredPosts = computed(() => {
-  return posts.filter(post => {
+  return posts.value.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
                          post.content.toLowerCase().includes(searchQuery.value.toLowerCase())
     const matchesCategory = !selectedCategory.value || post.category === selectedCategory.value
@@ -363,23 +223,71 @@ const toggleBookmark = (post) => {
   post.isBookmarked = !post.isBookmarked
 }
 
-const toggleLike = (post) => {
-  post.likes++
-}
-
-const showComments = (post) => {
-  // Show comments modal or navigate to post detail page
-  console.log('Show comments for post:', post)
-}
-
-const submitNewPost = async () => {
+const likePost = async (post) => {
   try {
-    // Submit new post to backend
-    console.log('New post:', newPost.value)
-    toast.success('Post created successfully!')
-    showNewPostModal.value = false
+    await forumStore.addReaction(post.id, 'like')
   } catch (error) {
-    toast.error('Failed to create post')
+    toast.error(error || 'Failed to like post')
   }
 }
+
+const showComments = async (post) => {
+  try {
+    await forumStore.fetchPostDetails(post.id)
+    // Handle showing comments modal or navigation
+  } catch (error) {
+    toast.error(error || 'Failed to fetch post details')
+  }
+}
+
+const handleImageUpload = (event) => {
+  const files = Array.from(event.target.files)
+  const maxSize = 10 * 1024 * 1024 // 10MB
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
+
+  files.forEach(file => {
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Only PNG, JPG, and GIF files are allowed')
+      return
+    }
+
+    if (file.size > maxSize) {
+      toast.error('File size must be less than 10MB')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      newPost.value.images.push({
+        file,
+        preview: e.target.result
+      })
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
+const removeImage = (index) => {
+  newPost.value.images.splice(index, 1)
+}
+
+// Add this helper function for date formatting
+const formatDate = (date) => {
+  const options = { year: 'numeric', month: 'short', day: 'numeric' }
+  return new Date(date).toLocaleDateString(undefined, options)
+}
+
+const autoResizeTextarea = (event) => {
+  const textarea = event.target
+  textarea.style.height = 'auto'
+  textarea.style.height = textarea.scrollHeight + 'px'
+}
+
+onMounted(async () => {
+  try {
+    await forumStore.fetchPosts()
+  } catch (error) {
+    toast.error(error || 'Failed to fetch posts')
+  }
+})
 </script> 

@@ -4,10 +4,10 @@ import { useAuthStore } from '@/stores/auth'
 const routes = [
   {
     path: '/',
-    redirect: '/login'
+    redirect: '/auth'
   },
   {
-    path: '/login',
+    path: '/auth',
     name: 'Login',
     component: () => import('@/views/AuthView.vue'),
     meta: { requiresAuth: false }
@@ -16,7 +16,7 @@ const routes = [
     path: '/onboarding',
     name: 'Onboarding',
     component: () => import('@/views/OnboardingView.vue'),
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: false }
   },
   {
     path: '/dashboard',
@@ -34,6 +34,12 @@ const routes = [
     path: '/forum',
     name: 'Forum',
     component: () => import('@/views/ForumView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/forum/post/:id',
+    name: 'PostDetail',
+    component: () => import('@/views/PostDetailView.vue'),
     meta: { requiresAuth: true }
   },
   {
@@ -46,6 +52,30 @@ const routes = [
     path: '/profile',
     name: 'Profile',
     component: () => import('@/views/ProfileView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/profile/saved-chats',
+    name: 'SavedChats',
+    component: () => import('@/views/SavedChatsView.vue'),
+    meta: { requiresAuth: true }
+  },
+  // {
+  //   path: '/profile/edit',
+  //   name: 'EditProfile',
+  //   component: () => import('@/views/EditProfileView.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+  // {
+  //   path: '/profile/documents',
+  //   name: 'Documents',
+  //   component: () => import('@/views/DocumentsView.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+  {
+    path: '/jobs',
+    name: 'Jobs',
+    component: () => import('@/views/JobsView.vue'),
     meta: { requiresAuth: true }
   }
 ]
@@ -60,8 +90,8 @@ router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
 
   if (requiresAuth && !authStore.isAuthenticated) {
-    next('/login')
-  } else if (to.path === '/login' && authStore.isAuthenticated) {
+    next('/auth')
+  } else if (to.path === '/auth' && authStore.isAuthenticated) {
     next('/dashboard')
   } else {
     next()
